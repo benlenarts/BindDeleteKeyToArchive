@@ -27,7 +27,15 @@
 - (void)override_keyDown:(NSEvent*)event {
     unichar key = [[event characters] characterAtIndex:0];
     if (key == NSDeleteCharacter) {
-        id messageViewer = [[self performSelector:@selector(delegate)] performSelector:@selector(delegate)];
+        id tableViewManager = [self performSelector:@selector(delegate)];
+        id messageListViewController = [tableViewManager performSelector:@selector(delegate)];
+
+        // NOTE: backwards compatibility. In 10.11 and earlier, tableViewManager.delegate.delegate was already the message viewer.
+        id messageViewer
+            = [messageListViewController respondsToSelector:@selector(messageViewer)]
+            ? [messageListViewController performSelector:@selector(messageViewer)]
+            : messageListViewController;
+
         [messageViewer performSelector:@selector(archiveMessages:) withObject:nil];
     } else {
         [self override_keyDown:event];
